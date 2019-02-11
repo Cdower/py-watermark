@@ -1,4 +1,4 @@
-import os,sys,io
+import os,sys, math
 import logging
 from PIL import Image, ImageFont, ImageDraw
 
@@ -6,9 +6,11 @@ from PIL import Image, ImageFont, ImageDraw
 Takes a single files, list of files or a directory and returns a list of files
 '''
 def gather_files(images):
+    if os.path.isdir(images):
+        print("Images is Dir")
     return [images]
 
-def watermark(images, watermark, output_dir, opacity=50):
+def process_images(images, watermark, output_dir, font_size=72, opacity=50):
     #log level debug: 
     # print(images)
     files_to_watermark = gather_files(images)
@@ -20,17 +22,20 @@ def watermark(images, watermark, output_dir, opacity=50):
             with Image.open(infile).convert('RGBA') as im:
                 print(infile, im.format, "%dx%d" % im.size, im.mode)
 
+                #if(im[0] > im[1]):
                 txt = Image.new('RGBA', im.size, (255,255,255,0))
-
+                #Constants
                 draw = ImageDraw.Draw(txt)
-                font = ImageFont.truetype('./Open_Sans/OpenSans-Regular.ttf', 72)
-                start = (20,20)
+                font = ImageFont.truetype('./Open_Sans/OpenSans-Regular.ttf', font_size)
                 fill = (255,255,255,int(opacity/100 * 255))
-                print(watermark["text"])
+                textsize = draw.textsize(watermark["text"], font=font)
+                start = ( int((im.size[0]-textsize[0])/2), int((im.size[1]-textsize[1])/2))
                 draw.text(start, watermark["text"], font=font, fill=fill)
-                
-                out = Image.alpha_composite(im,txt)
-                out.show()
+                # Layer Text on Origional Image at <angle>
+                rot = txt.rotate(-35)
+                out = Image.alpha_composite(im,rot)
+
+                # Save Out Image
                 if not os.path.isdir(output_dir):
                     os.mkdir(output_dir)
                 file_split = os.path.basename(infile).split('.')
