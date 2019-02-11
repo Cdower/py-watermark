@@ -1,5 +1,5 @@
 import sys, argparse
-from watermark import watermark
+from watermark import process_images
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Watermark one or more images.')
@@ -9,6 +9,8 @@ if __name__ == "__main__":
         help="Water Mark Image")
     parser.add_argument('--output-dir', nargs=1, default='./watermarked-images',
         help="Output dir of watermarked image(s)") #type=argparse.FileType('w'),
+    parser.add_argument('--opacity', help='Text Opacity', default=50)
+    parser.add_argument('--font-size', help='Font Size', default=72)
     parser.add_argument('--infile', nargs='?', help="Image(s) to watermark", required=True)
     #
     #
@@ -18,4 +20,6 @@ if __name__ == "__main__":
         "text": str().join(args.watermark_text),
         "image": args.watermark_image
     }
-    watermark(images=args.infile, watermark=watermark_in, output_dir=args.output_dir[0])
+    print(args.opacity)
+    print(args.font_size)
+    process_images(images=args.infile, watermark=watermark_in, output_dir=args.output_dir[0], font_size=int(args.font_size), opacity=int(args.opacity))
